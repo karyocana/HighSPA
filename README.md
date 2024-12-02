@@ -10,12 +10,12 @@ ParslCodeml is a Python script designed to automate phylogenetic analyses using 
 
 ## Installation
 ### Requirements
-- Python 3.8 or later
-- Parsl
-- MAFFT
-- Java (for Readseq)
-- PAML (codeml)
-- RAxML
+- [Python](https://www.python.org/) 3.8 or later
+- [Parsl](https://parsl-project.org/)
+- [MAFFT](https://mafft.cbrc.jp/)
+- [Java](https://www.java.com/es/) (for [Readseq](https://bioinformatics.org/~thomas/mol_lin/readseq/)])
+- [PAML](http://abacus.gene.ucl.ac.uk/software/paml.html) (codeml)
+- [RAxML](https://cme.h-its.org/exelixis/web/software/raxml/)
 - Additional Python dependencies (see requirements.txt)
 ### Setup
 1. Clone this repository:
