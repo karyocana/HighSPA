@@ -1,0 +1,85 @@
+
+
+IMPORTANT WARNING: Sequences 1 and 4 are exactly identical
+
+
+IMPORTANT WARNING: Sequences 2 and 5 are exactly identical
+
+
+IMPORTANT WARNING: Sequences 3 and 6 are exactly identical
+
+IMPORTANT WARNING
+Found 3 sequences that are exactly identical to other sequences in the alignment.
+Normally they should be excluded from the analysis.
+
+Just in case you might need it, an alignment file with 
+sequence duplicates removed is printed to file /Users/karyocana/parslCodeml/outputs/test.phylip.reduced
+
+
+This is RAxML version 7.2.8 released by Alexandros Stamatakis in October 2010.
+
+With greatly appreciated code contributions by:
+Andre Aberer (TUM)
+Simon Berger (TUM)
+John Cazes (TACC)
+Michael Ott (TUM)
+Nick Pattengale (UNM)
+Wayne Pfeiffer (SDSC)
+Akifumi S. Tanabe (Univ. Tsukuba)
+
+
+Alignment has 5 distinct alignment patterns
+
+Proportion of gaps and completely undetermined characters in this alignment: 5.56%
+
+RAxML rapid hill-climbing mode
+
+Using 1 distinct models/data partitions with joint branch length optimization
+
+
+Executing 1 inferences on the original alignment using 1 distinct randomized MP trees
+
+All free model parameters will be estimated by RAxML
+ML estimate of 25 per site rate categories
+
+Likelihood of final tree will be evaluated and optimized under GAMMA
+
+GAMMA Model parameters will be estimated up to an accuracy of 0.1000000000 Log Likelihood units
+
+Partition: 0
+Alignment Patterns: 5
+Name: No Name Provided
+DataType: DNA
+Substitution Matrix: GTR
+
+
+
+
+RAxML was called as follows:
+
+raxmlHPC -s /Users/karyocana/parslCodeml/outputs/test.phylip -m GTRCAT -n test_output.tree -w /Users/karyocana/parslCodeml/outputs 
+
+
+Inference[0]: Time 0.003875 CAT-based likelihood -36.347630, best rearrangement setting 3
+alpha[0]: 1.000000 rates[0] ac ag at cg ct gt: 0.000017 0.000017 0.000017 0.000017 3.845475 1.000000 
+
+
+Conducting final model optimizations on all 1 trees under GAMMA-based models ....
+
+Testing which likelihood implementation to use
+Standard Implementation full tree traversal time: 0.000025
+Subtree Equality Vectors for gap columns full tree traversal time: 0.000280
+... using standard implementation
+
+Inference[0] final GAMMA-based Likelihood: -41.581448 tree written to file /Users/karyocana/parslCodeml/outputs/RAxML_result.test_output.tree
+
+
+Starting final GAMMA-based thorough Optimization on tree 0 likelihood -41.581448 .... 
+
+Final GAMMA-based Score of best tree -41.581412
+
+Program execution info written to /Users/karyocana/parslCodeml/outputs/RAxML_info.test_output.tree
+Best-scoring ML tree written to: /Users/karyocana/parslCodeml/outputs/RAxML_bestTree.test_output.tree
+
+Overall execution time: 0.010957 secs or 0.000003 hours or 0.000000 days
+

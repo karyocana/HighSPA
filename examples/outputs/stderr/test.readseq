@@ -1,0 +1,4 @@
+--> executable follows <--
+java -jar /Users/karyocana/parslCodeml/scripts/readseq.jar -all -f=12 /Users/karyocana/parslCodeml/outputs/test.mafft -o /Users/karyocana/parslCodeml/outputs/test.phylip
+--> end executable <--
+Readseq version 2.1.30 (12-May-2010)

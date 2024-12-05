@@ -1,0 +1,53 @@
+--> executable follows <--
+mafft --thread 4 /Users/karyocana/parslCodeml/inputs/test.fasta > /Users/karyocana/parslCodeml/outputs/test.mafft
+--> end executable <--
+nthread = 4
+nthreadpair = 4
+nthreadtb = 4
+ppenalty_ex = 0
+stacksize: 8176 kb
+generating a scoring matrix for nucleotide (dist=200) ... done
+Gap Penalty = -1.53, +0.00, +0.00
+
+
+
+Making a distance matrix ..
+    1 / 6 (thread    0)
+done.
+
+Constructing a UPGMA tree (efffree=0) ... 
+    0 / 6
+done.
+
+Progressive alignment 1/2... 
+STEP     1 / 5 (thread    2) fSTEP     4 / 5 (thread    1) fSTEP     2 / 5 (thread    0) fSTEP     3 / 5 (thread    3) fSTEP     5 / 5 (thread    2) f
+done.
+
+Making a distance matrix from msa.. 
+    0 / 6 (thread    0)
+done.
+
+Constructing a UPGMA tree (efffree=1) ... 
+    0 / 6
+done.
+
+Progressive alignment 2/2... 
+STEP     1 / 5 (thread    0) fSTEP     3 / 5 (thread    2) fSTEP     2 / 5 (thread    1) fSTEP     4 / 5 (thread    3) fSTEP     5 / 5 (thread    1) f
+done.
+
+disttbfast (nuc) Version 7.526
+alg=A, model=DNA200 (2), 1.53 (4.59), -0.00 (-0.00), noshift, amax=0.0
+4 thread(s)
+
+
+Strategy:
+ FFT-NS-2 (Fast but rough)
+ Progressive method (guide trees were built 2 times.)
+
+If unsure which option to use, try 'mafft --auto input > output'.
+For more information, see 'mafft --help', 'mafft --man' and the mafft page.
+
+The default gap scoring scheme has been changed in version 7.110 (2013 Oct).
+It tends to insert more gaps into gap-rich regions than previous versions.
+To disable this change, add the --leavegappyregion option.
+

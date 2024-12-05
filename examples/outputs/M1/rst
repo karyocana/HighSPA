@@ -1,0 +1,23 @@
+Supplemental results for CODEML (seqf: /Users/karyocana/parslCodeml/outputs/test_formatted.phylip  treef: /Users/karyocana/parslCodeml/outputs/RAxML_result.test_output.tree)
+
+
+dN/dS (w) for site classes (K=2)
+
+p:   0.73584  0.26416
+w:   0.00000  1.00000
+
+Naive Empirical Bayes (NEB) probabilities for 2 classes & postmean_w
+(amino acids refer to 1st sequence: 1)
+
+   1 T   0.90291 0.09709 ( 1)  0.097
+   2 S   0.78642 0.21358 ( 1)  0.214
+   3 C   0.87300 0.12700 ( 1)  0.127
+   4 D   0.80858 0.19142 ( 1)  0.191
+   5 A   0.81863 0.18137 ( 1)  0.181
+   6 Y   0.80336 0.19664 ( 1)  0.197
+   7 V   0.89390 0.10610 ( 1)  0.106
+   8 -   0.00000 1.00000 ( 2)  1.000
+
+
+lnL =   -39.368253
+
