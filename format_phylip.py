@@ -1,7 +1,7 @@
 import sys
 import os
 
-def post_process_phylip(PhylipFile):
+def post_process_phylip(PhylipFile, OutputFile = None):
     # Abrir o arquivo phylip e ler seu conteúdo
     try:
         with open(PhylipFile, "r") as f:
@@ -17,7 +17,8 @@ def post_process_phylip(PhylipFile):
     extension = os.path.splitext(PhylipFile)[1]
 
     # Alterar o sufixo para "_formatted"
-    OutputFile = f"{basename}_formatted{extension}"
+    if OutputFile is None:
+        OutputFile = f"{basename}_formatted{extension}"
 
     # Processar o conteúdo do arquivo
     try:
