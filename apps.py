@@ -1,4 +1,4 @@
-import os, parsl, logging
+import os, parsl, logging, re
 from parsl.data_provider.files import File
 from parsl import bash_app, python_app
 
@@ -7,7 +7,8 @@ logger = logging.getLogger()
 @bash_app
 def mafft(executables, multithread_parameter, infile, outputs=[], stdout = parsl.AUTO_LOGNAME, stderr=parsl.AUTO_LOGNAME):
     logger.info(f"Running MAFFT on {infile} with {multithread_parameter} threads.")
-    return f'{executables["mafft"]} --thread {multithread_parameter} {infile} > {outputs[0]}'
+    return f'{executables["mafft"]} --thread {multithread_parameter} --auto --phylipout --inputorder {infile} > {outputs[0]}'
+
 
 @bash_app
 def readseq(executables, infile, prefix, outputs=[], stdout = parsl.AUTO_LOGNAME, stderr=parsl.AUTO_LOGNAME):
@@ -24,15 +25,16 @@ def format_phylip(infile, prefix, outputs=[], stdout = parsl.AUTO_LOGNAME, stder
 
 @bash_app
 def raxml(executables, infile, prefix, outputs=[], stdout = parsl.AUTO_LOGNAME, stderr=parsl.AUTO_LOGNAME):
-    logger.info(f"Running RAxML on {infile} with prefix {prefix}.")
+    import random
+    seed = random.randint(1, 1000)
+    logger.info(f"Running RAxML on {infile} with prefix {prefix} and seed {seed}.")
     output_dir = str(outputs[0].url).rsplit('/', 1)[0]
-    return f'{executables["raxml"]} -s {infile} -m GTRCAT -n {prefix}_output.tree -w {output_dir} > {outputs[0]} 2>{stderr}'
+    return f'{executables["raxml"]} -s {infile} -m GTRCAT -n {prefix}_output.tree -w {output_dir} -p {seed}'
 
 @bash_app
-def codeml(executables, infile, treefile, prefix, model, outputs=[], stdout = parsl.AUTO_LOGNAME, stderr=parsl.AUTO_LOGNAME):
- 
+def codeml(executables, infile, treefile, prefix, model, dir_outputs, outputs=[], stdout = parsl.AUTO_LOGNAME, stderr=parsl.AUTO_LOGNAME):
+    
     # Pega o diretório de saída do argumento da linha de comando (sys.argv[3])
-    dir_outputs = sys.argv[3]
     print(f"Diretório de saída (dir_outputs): {dir_outputs}")  # Depuração para verificar o diretório correto
 
     # Subdiretório específico para o modelo (ex: M0, M1, ...)
@@ -43,7 +45,7 @@ def codeml(executables, infile, treefile, prefix, model, outputs=[], stdout = pa
     os.makedirs(model_output_dir, exist_ok=True)
 
     # Caminho para o arquivo .ctl (será gravado no subdiretório do modelo)
-    ctl_template_path = f'/Users/karyocana/parslCodeml/scripts/{model}/codeml.ctl'
+    ctl_template_path = f'./scripts/{model}/codeml.ctl'
     new_ctl_path = os.path.join(model_output_dir, "codeml.ctl")  # Caminho correto para o arquivo .ctl
 
     # Ler o template e substituir as variáveis no arquivo .ctl
@@ -51,16 +53,16 @@ def codeml(executables, infile, treefile, prefix, model, outputs=[], stdout = pa
         ctl_content = ctl_file.read()
 
     # Substituir o caminho do arquivo Phylip
-    ctl_content = ctl_content.replace("%=FASTA_FILE%-f.phylip", infile)  # Substituir o arquivo Phylip
+    ctl_content = ctl_content.replace("%=FASTA_FILE%-f.phylip", infile.filepath)  # Substituir o arquivo Phylip
 
     # Ajustar o caminho do 'treefile' para o formato correto, mas no diretório geral
-    fixed_treefile = os.path.join(dir_outputs, f"RAxML_result.{prefix}_output.tree")  # Caminho correto para o treefile
-    print(f"fixed_treefile: {fixed_treefile}")  # Depuração do caminho do treefile
+    #fixed_treefile = os.path.join(dir_outputs, f"RAxML_result.{prefix}_output.tree")  # Caminho correto para o treefile
+    #print(f"fixed_treefile: {fixed_treefile}")  # Depuração do caminho do treefile
 
     # Substituir o campo 'treefile' no arquivo .ctl
     ctl_content = re.sub(
         r"treefile\s*=\s*.*",  # Localizar a linha específica de "treefile"
-        f"treefile = {fixed_treefile}",  # Substituir com o caminho fixo para o treefile
+        f"treefile = {treefile.filepath}",  # Substituir com o caminho fixo para o treefile
         ctl_content
     )
 
@@ -77,5 +79,5 @@ def codeml(executables, infile, treefile, prefix, model, outputs=[], stdout = pa
         new_ctl_file.write(ctl_content)
 
     # Retornar o comando para execução do codeml
-    return f"cd {model_output_dir} && {executables['codeml']} {new_ctl_path} 2>{stderr}"
+    return f"cd {model_output_dir} && {executables['codeml']} {new_ctl_path}"
 

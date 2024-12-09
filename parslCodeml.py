@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-import os, sys, re, argparse, parsl
+import os
+import sys
+import re
+import argparse
+import parsl
+import glob
 from parsl.data_provider.files import File
 from pathlib import Path
 from datetime import datetime
@@ -9,11 +14,16 @@ from apps import *
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog="ParslCodeML",
                                      description="Python script designed to automate phylogenetic analyses using a series of bioinformatics tools.")
-    parser.add_argument("-t", "--threads", help="Maximum number of threads used by the workflow.", required=True,type=int)
-    parser.add_argument("-i", "--input", help="Folder containing the fasta files used by the workflow.", required=True, type=str)
-    parser.add_argument("-o", "--output", help="Folder where the outputs will be stored.", required=True, type=str)
-    parser.add_argument("-e", "--executables", help="Json file containing the executables' info.", required=True, type=str)
-    parser.add_argument("-m", "--monitoring", help="Flag to inform parsl to store metadata about the execution.", action=argparse.BooleanOptionalAction)
+    parser.add_argument(
+        "-t", "--threads", help="Maximum number of threads used by the workflow.", required=True, type=int)
+    parser.add_argument(
+        "-i", "--input", help="Folder containing the fasta files used by the workflow.", required=True, type=str)
+    parser.add_argument(
+        "-o", "--output", help="Folder where the outputs will be stored.", required=True, type=str)
+    parser.add_argument("-e", "--executables",
+                        help="Json file containing the executables' info.", required=True, type=str)
+    parser.add_argument("-m", "--monitoring", help="Flag to inform parsl to store metadata about the execution.",
+                        action=argparse.BooleanOptionalAction)
 
     args = parser.parse_args()
 
@@ -22,7 +32,10 @@ if __name__ == "__main__":
                      label="default",
                      monitoring=args.monitoring)
     executables = load_and_check_executables(args.executables)
-    logger = parsl.set_file_logger(f"ParslCodeML-{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}")
+    parsl.set_file_logger(
+        f"ParslCodeML-{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.log")
+    parsl.set_stream_logger(stream=sys.stdout)
+    logger = logging.getLogger()
     parsl.load(cfg)
 
     # Execução do Codeml, agora puxando o diretório de saída de 'outputs'
@@ -36,116 +49,64 @@ if __name__ == "__main__":
     }
 
     # Pegando os argumentos
-    multithread = args.threads
-    inputs_mafft = args.input
+    max_threads = args.threads
+    inputs = args.input
     dir_outputs = args.output
 
-    # Criando diretórios de saída
-    Path(f"{dir_outputs}/stderr").mkdir(parents=True, exist_ok=True)
-
-    # Processando entradas
-    p = Path(inputs_mafft)
-    fasta = list(p.glob('*'))
-
-    print(f"Found {len(fasta)} files in {inputs_mafft}.")
+    # Procurando pelos arquivos fasta no diretório de entrada
+    fasta_files = glob.glob(os.path.join(inputs, '*'))
+    logger.info(f"Found {len(fasta_files)} files in {inputs}.")
 
     # Inicializando as listas de futuros para cada etapa
-    mafft_futures, readseq_futures, format_phylip_futures, raxml_futures = [], [], [], []
-    codeml_futures = {model: [] for model in ["M0", "M1", "M2", "M3", "M7", "M8"]}
+    codeml_futures = {model: []
+                      for model in ["M0", "M1", "M2", "M3", "M7", "M8"]}
 
     # Execução do MAFFT
-    for i in fasta:
-        prefix = Path(i.stem).stem
-        output_mafft = f'{dir_outputs}/{prefix}.mafft'
-        stderr_mafft = f'{dir_outputs}/stderr/{prefix}.mafft'
-        infile = str(i)
-        print(f"Starting MAFFT for {infile}, output will be saved to {output_mafft}.")
-        mafft_futures.append(mafft(multithread_parameter=multithread, infile=infile, outputs=[File(output_mafft)], stderr=stderr_mafft))
-    # Esperar a execução do MAFFT
-    mafft_results = [j.result() for j in mafft_futures]
-
-    # Execução do READSEQ, aguardando os resultados de MAFFT
-    readseq_futures = []
-    for p in mafft_futures:
-        prefix = Path(p.outputs[0].filename).stem
-        output_readseq = f'{dir_outputs}/{prefix}.phylip'
-        stderr_readseq = f'{dir_outputs}/stderr/{prefix}.readseq'
-        print(f"Starting Readseq for {p.outputs[0]}, output will be saved to {output_readseq}.")
-        readseq_futures.append(readseq(infile=p.outputs[0], prefix=prefix, outputs=[File(output_readseq)], stderr=stderr_readseq))
-    # Esperar a execução do Readseq
-    readseq_results = [j.result() for j in readseq_futures]
-
-    # Execução do FORMAT_PHYLIP, aguardando os resultados de Readseq
-    format_phylip_futures = []
-    for p in readseq_futures:
-        prefix = Path(p.outputs[0].filename).stem
-        output_format = f'{dir_outputs}/{prefix}_formatted.phylip'
-        print(f"Starting format_phylip for {p.outputs[0]}, output will be saved to {output_format}.")
-        format_phylip_futures.append(format_phylip(infile=p.outputs[0], prefix=prefix, outputs=[File(output_format)], stderr=f'{dir_outputs}/stderr/{prefix}.format_phylip'))
-    # Esperar a execução do Format Phylip
-    format_phylip_results = [j.result() for j in format_phylip_futures]
-
-
-    # Execução do RAXML, aguardando os resultados de Format Phylip
-    raxml_futures = []
-    for p in readseq_futures:
-        prefix = Path(p.outputs[0].filename).stem
-        output_raxml = f'{dir_outputs}/{prefix}_raxml.tree'
-        stderr_raxml = f'{dir_outputs}/stderr/{prefix}.raxml'
-        print(f"Starting RAxML for {p.outputs[0]}, output will be saved to {output_raxml}.")
-        raxml_futures.append(raxml(infile=p.outputs[0], prefix=prefix, outputs=[File(output_raxml)], stderr=stderr_raxml))
-    # Esperar a execução do RAXML
-    raxml_results = [j.result() for j in raxml_futures]
-
-
-    # Inicialização das listas de futuros de Codeml por modelo
-    codeml_futures = {model: [] for model in ["M0", "M1", "M2", "M3", "M7", "M8"]}
-
-
-    # Execução do Codeml, aguardando os resultados de RAXML e Format Phylip
-    for model, app in codeml_apps.items():
-        for p_format, p_raxml in zip(format_phylip_futures, raxml_futures):
-            # Pegando o diretório output, baseado no arquivo de p_format
-            #mafft_output_dir = str(p_format.outputs[0].filepath).rsplit('/', 1)[0]  # Caminho base do diretório de saída
-            dir_outputs = sys.argv[3]
-
-            # Agora pegamos o prefixo corretamente de p_raxml, sem sufixo '_raxml'
-            prefix_raxml = Path(p_raxml.outputs[0].filename).stem.split('_')[0]
-
-            # Corrigir o nome do arquivo de saída para o Codeml
-            #output_codeml = f"{mafft_output_dir}/{model}/{model}_{prefix_raxml}.results.txt"
-            #stderr_codeml = f"{mafft_output_dir}/stderr/{prefix_raxml}_{model}.codeml"
-
-            output_codeml = f"{dir_outputs}/{model}/{model}_{prefix_raxml}.results.txt"
-            stderr_codeml = f"{dir_outputs}/stderr/{prefix_raxml}_{model}.codeml"
-
-            infile = p_format.outputs[0].filepath  # Caminho para o arquivo Phylip formatado
-            treefile = p_raxml.outputs[0].filepath  # Caminho para o arquivo de árvore gerado pelo RAxML
-
+    for i in fasta_files:
+        prefix = Path(i).stem
+        output_mafft = os.path.join(dir_outputs, f"{prefix}.mafft")
+        logger.info(f"Starting MAFFT for {
+                    i}, output will be saved to {output_mafft}.")
+        ret_mafft = mafft(executables, multithread_parameter=1, infile=i,
+                          outputs=[File(output_mafft)])
+        # Execução do READSEQ, cada um dependendo de um mafft
+        #output_readseq = os.path.join(dir_outputs, f"{prefix}.phylip")
+        #logger.info(f"Starting Readseq for {
+        #            prefix}, output will be saved to {output_readseq}.")
+        #ret_readseq = readseq(executables, infile=ret_mafft[0].outputs[0], prefix=prefix, outputs=[
+        #                      File(output_readseq)])
+        # Formatação do arquivo phylip 
+        output_formatted_phylip = os.path.join(
+            dir_outputs, f"{prefix}_formatted.phylip")
+        logger.info(f"Starting format_phylip for {
+                    output_mafft}, output will be saved to {output_formatted_phylip}.")
+        ret_format_phylip = format_phylip(infile=ret_mafft[0].outputs[0], prefix=prefix, outputs=[
+                                          File(output_formatted_phylip)])
+        
+        # Execução do RAXML, aguardando os resultados de Format Phylip
+        output_raxml = os.path.join(dir_outputs, f"RAxML_result.{prefix}_output.tree")
+        logger.info(f"Starting RAxML for {
+                    ret_format_phylip}, output will be saved to {output_raxml}.")
+        ret_raxml = raxml(executables, infile=ret_mafft[0].outputs[0], prefix=prefix, outputs=[
+                          File(output_raxml)])
+        # Execução do Codeml, aguardando os resultados de RAXML e Format Phylip
+        for model, app in codeml_apps.items():
+            output_codeml = os.path.join(dir_outputs, os.path.join(
+                model, dir_outputs, f"{model}_{prefix}.results.txt"))
             # Adicionar a tarefa de Codeml
             codeml_futures[model].append(
-                app(infile=infile, treefile=treefile, prefix=prefix_raxml, model=model, outputs=[File(output_codeml)], stderr=stderr_codeml)
+                app(executables, infile=ret_format_phylip[0].outputs[0], treefile=ret_raxml[0].outputs[0], prefix=prefix,
+                    model=model, dir_outputs=dir_outputs, outputs=[File(output_codeml)])
             )
 
-    # Esperando as tarefas terminarem
-    mafft_results = [j.result() for j in mafft_futures]
-    readseq_results = [j.result() for j in readseq_futures]
-    format_phylip_results = [j.result() for j in format_phylip_futures]
-    raxml_results = [j.result() for j in raxml_futures]
-    codeml_results = {model: [j.result() for j in codeml_futures[model]] for model in codeml_futures}
-
-    print("MAFFT Results:", mafft_results)
-    print("Readseq Results:", readseq_results)
-    print("Format Phylip Results:", format_phylip_results)
-    print("RAxML Results:", raxml_results)
-    print("Codeml Results:", codeml_results)
-
+    parsl.wait_for_current_tasks()
+    logger.info("All tasks were performed! Finishing execution!")
+    parsl.dfk().cleanup()
 
     # Aguardar resultados
 
-
-    #Executar o script
-    #python3 parslCodeml.py 1 /Users/karyocana/parslCodeml/inputs /Users/karyocana/parslCodeml/outputs
-    #Activate parsl_env
-    #source /Users/karyocana/parslCodeml/parsl_env/bin/activate 
-    #deactivate
+    # Executar o script
+    # python3 parslCodeml.py 1 /Users/karyocana/parslCodeml/inputs /Users/karyocana/parslCodeml/outputs
+    # Activate parsl_env
+    # source /Users/karyocana/parslCodeml/parsl_env/bin/activate
+    # deactivate
