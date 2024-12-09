@@ -51,7 +51,6 @@ if __name__ == "__main__":
     # Pegando os argumentos
     max_threads = args.threads
     inputs = args.input
-    dir_outputs = args.output
 
     # Procurando pelos arquivos fasta no diretório de entrada
     fasta_files = glob.glob(os.path.join(inputs, '*'))
@@ -64,6 +63,8 @@ if __name__ == "__main__":
     # Execução do MAFFT
     for i in fasta_files:
         prefix = Path(i).stem
+        dir_outputs = os.path.join(args.output, prefix)
+        Path.mkdir(dir_outputs, exist_ok=True)
         output_mafft = os.path.join(dir_outputs, f"{prefix}.mafft")
         logger.info(f"Starting MAFFT for {
                     i}, output will be saved to {output_mafft}.")
