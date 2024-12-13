@@ -63,8 +63,8 @@ if __name__ == "__main__":
     # Execução do MAFFT
     for i in fasta_files:
         prefix = Path(i).stem
-        dir_outputs = os.path.join(args.output, prefix)
-        Path.mkdir(dir_outputs, exist_ok=True)
+        dir_outputs = Path(os.path.join(args.output, prefix))
+        Path.mkdir(Path(dir_outputs), exist_ok=True, parents=True)
         output_mafft = os.path.join(dir_outputs, f"{prefix}.mafft")
         logger.info(f"Starting MAFFT for {
                     i}, output will be saved to {output_mafft}.")
@@ -81,22 +81,22 @@ if __name__ == "__main__":
             dir_outputs, f"{prefix}_formatted.phylip")
         logger.info(f"Starting format_phylip for {
                     output_mafft}, output will be saved to {output_formatted_phylip}.")
-        ret_format_phylip = format_phylip(infile=ret_mafft[0].outputs[0], prefix=prefix, outputs=[
+        ret_format_phylip = format_phylip(infile=ret_mafft.outputs[0], prefix=prefix, outputs=[
                                           File(output_formatted_phylip)])
         
         # Execução do RAXML, aguardando os resultados de Format Phylip
         output_raxml = os.path.join(dir_outputs, f"RAxML_result.{prefix}_output.tree")
         logger.info(f"Starting RAxML for {
                     ret_format_phylip}, output will be saved to {output_raxml}.")
-        ret_raxml = raxml(executables, infile=ret_mafft[0].outputs[0], prefix=prefix, outputs=[
+        ret_raxml = raxml(executables, infile=ret_mafft.outputs[0], prefix=prefix, outputs=[
                           File(output_raxml)])
         # Execução do Codeml, aguardando os resultados de RAXML e Format Phylip
         for model, app in codeml_apps.items():
             output_codeml = os.path.join(dir_outputs, os.path.join(
-                model, dir_outputs, f"{model}_{prefix}.results.txt"))
+                model, f"{model}_{prefix}.results.txt"))
             # Adicionar a tarefa de Codeml
             codeml_futures[model].append(
-                app(executables, infile=ret_format_phylip[0].outputs[0], treefile=ret_raxml[0].outputs[0], prefix=prefix,
+                app(executables, infile=ret_format_phylip.outputs[0], treefile=ret_raxml.outputs[0], prefix=prefix,
                     model=model, dir_outputs=dir_outputs, outputs=[File(output_codeml)])
             )
 

@@ -4,7 +4,7 @@
         "executable": "mafft"
     },
     "readseq": {
-        "path": "/home/rafael/Documentos/GitHub/ParslCodeml/",
+        "path": "/mnt/d/Users/rafae/Documents/GitHub/ParslCodeml",
         "executable": "readseq.jar"
     },
     "raxml": {
