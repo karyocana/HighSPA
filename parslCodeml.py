@@ -53,9 +53,9 @@ if __name__ == "__main__":
     inputs = args.input
 
     # Procurando pelos arquivos fasta no diretório de entrada
-    fasta_files = glob.glob(os.path.join(inputs, '*'))
+    fasta_files = glob.glob(os.path.join(inputs, '**'), recursive=True)
     logger.info(f"Found {len(fasta_files)} files in {inputs}.")
-
+    fasta_files = list(filter(lambda x: os.path.isfile(x), fasta_files))
     # Inicializando as listas de futuros para cada etapa
     codeml_futures = {model: []
                       for model in ["M0", "M1", "M2", "M3", "M7", "M8"]}
@@ -63,7 +63,9 @@ if __name__ == "__main__":
     # Execução do MAFFT
     for i in fasta_files:
         prefix = Path(i).stem
-        dir_outputs = Path(os.path.join(args.output, prefix))
+        input_fullpath = os.path.dirname(i)
+        path_to_add_out = os.path.relpath(input_fullpath, args.input)
+        dir_outputs = Path(os.path.join(os.path.join(args.output, path_to_add_out), prefix))
         Path.mkdir(Path(dir_outputs), exist_ok=True, parents=True)
         output_mafft = os.path.join(dir_outputs, f"{prefix}.mafft")
         logger.info(f"Starting MAFFT for {
