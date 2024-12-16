@@ -79,5 +79,5 @@ def codeml(executables, infile, treefile, prefix, model, dir_outputs, outputs=[]
         new_ctl_file.write(ctl_content)
 
     # Retornar o comando para execução do codeml
-    return f"cd {model_output_dir} && {executables['codeml']} {new_ctl_path}"
+    return f"cd {model_output_dir} && {executables['codeml']} codeml.ctl"
 
