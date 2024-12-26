@@ -3,6 +3,7 @@ runinfo/
 examples/
 saida/
 cleanTOcodeml/
-
+i/
+o/
 
 examples/outputs/*
