@@ -36,17 +36,17 @@ def gen_config(threads=4, label="local", monitoring=True, slurm=False):
                                               provider=LocalProvider(
                                                   nodes_per_block=1,
                                                   init_blocks=1,
-                                                  max_blocks=n_nodes,
+                                                  max_blocks=int(n_nodes),
                                                   min_blocks=0,
                                                   parallelism=1,
                                                   # TODO
                                                   # Change it from hardcoded
-                                                  worker_init="module load mafft;module load anaconda3/2024.02_sequana;eval \"$(conda shell.bash hook)\";conda activate /scratch/cenapadrjsd/rafael.terra2/conda_envs/parslcodeml",
+                                                  worker_init=f"module load mafft;module load anaconda3/2024.02_sequana;eval \"$(conda shell.bash hook)\";conda activate /scratch/cenapadrjsd/rafael.terra2/conda_envs/parslcodeml;export PYTHONPATH=$PYTHONPATH:{os.getcwd()}",
                                                   launcher=SrunLauncher(
                                                       overrides=f'-c {n_workers}')
                                               )
                                               )],
-            monitor=monitor
+            monitoring=monitor
         )
 
 
