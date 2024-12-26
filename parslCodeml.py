@@ -24,13 +24,15 @@ if __name__ == "__main__":
                         help="Json file containing the executables' info.", required=True, type=str)
     parser.add_argument("-m", "--monitoring", help="Flag to inform parsl to store metadata about the execution.",
                         action=argparse.BooleanOptionalAction)
+    parser.add_argument("--onslurm", help="Flag to inform parsl to execute using the HighThroughput executor.",
+                        action=argparse.BooleanOptionalAction)
 
     args = parser.parse_args()
 
     # Carregar a configuração do Parsl e verifica o caminho dos executáveis
     cfg = gen_config(threads=args.threads,
                      label="default",
-                     monitoring=args.monitoring)
+                     monitoring=args.monitoring, slurm=args.onslurm)
     executables = load_and_check_executables(args.executables)
     parsl.set_file_logger(
         f"ParslCodeML-{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.log")
@@ -65,7 +67,8 @@ if __name__ == "__main__":
         prefix = Path(i).stem
         input_fullpath = os.path.dirname(i)
         path_to_add_out = os.path.relpath(input_fullpath, args.input)
-        dir_outputs = Path(os.path.join(os.path.join(args.output, path_to_add_out), prefix))
+        dir_outputs = Path(os.path.join(os.path.join(
+            args.output, path_to_add_out), prefix))
         Path.mkdir(Path(dir_outputs), exist_ok=True, parents=True)
         output_mafft = os.path.join(dir_outputs, f"{prefix}.mafft")
         logger.info(f"Starting MAFFT for {
@@ -73,21 +76,22 @@ if __name__ == "__main__":
         ret_mafft = mafft(executables, multithread_parameter=1, infile=i,
                           outputs=[File(output_mafft)])
         # Execução do READSEQ, cada um dependendo de um mafft
-        #output_readseq = os.path.join(dir_outputs, f"{prefix}.phylip")
-        #logger.info(f"Starting Readseq for {
+        # output_readseq = os.path.join(dir_outputs, f"{prefix}.phylip")
+        # logger.info(f"Starting Readseq for {
         #            prefix}, output will be saved to {output_readseq}.")
-        #ret_readseq = readseq(executables, infile=ret_mafft[0].outputs[0], prefix=prefix, outputs=[
+        # ret_readseq = readseq(executables, infile=ret_mafft[0].outputs[0], prefix=prefix, outputs=[
         #                      File(output_readseq)])
-        # Formatação do arquivo phylip 
+        # Formatação do arquivo phylip
         output_formatted_phylip = os.path.join(
             dir_outputs, f"{prefix}_formatted.phylip")
         logger.info(f"Starting format_phylip for {
                     output_mafft}, output will be saved to {output_formatted_phylip}.")
         ret_format_phylip = format_phylip(infile=ret_mafft.outputs[0], prefix=prefix, outputs=[
                                           File(output_formatted_phylip)])
-        
+
         # Execução do RAXML, aguardando os resultados de Format Phylip
-        output_raxml = os.path.join(dir_outputs, f"RAxML_result.{prefix}_output.tree")
+        output_raxml = os.path.join(
+            dir_outputs, f"RAxML_result.{prefix}_output.tree")
         logger.info(f"Starting RAxML for {
                     ret_format_phylip}, output will be saved to {output_raxml}.")
         ret_raxml = raxml(executables, infile=ret_mafft.outputs[0], prefix=prefix, outputs=[

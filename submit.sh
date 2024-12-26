@@ -11,6 +11,7 @@
 
 module load mafft
 module load anaconda3/2024.02_sequana
+eval "$(conda shell.bash hook)"
 conda activate /scratch/cenapadrjsd/rafael.terra2/conda_envs/parslcodeml
 CDIR="/scratch/cenapadrjsd/rafael.terra2/ParslCodeml"
 INPUT_FOLDER="${CDIR}/examples/inputs"
