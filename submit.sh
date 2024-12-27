@@ -12,7 +12,9 @@
 module load mafft
 module load anaconda3/2024.02_sequana
 eval "$(conda shell.bash hook)"
-conda activate /scratch/cenapadrjsd/rafael.terra2/conda_envs/parslcodeml
+CONDA_ENV="/scratch/cenapadrjsd/rafael.terra2/conda_envs/parslcodeml"
+conda activate ${CONDA_ENV}
+export CONDA_ENV #This variable should be with the same name and exported because when using HTE, the code will search for it.
 CDIR="/scratch/cenapadrjsd/rafael.terra2/ParslCodeml"
 INPUT_FOLDER="${CDIR}/examples/inputs"
 OUTPUT_FOLDER="${CDIR}/saida_denv"
