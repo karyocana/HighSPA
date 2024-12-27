@@ -41,7 +41,7 @@ def gen_config(threads=4, label="local", monitoring=True, slurm=False):
                                                   parallelism=1,
                                                   # TODO
                                                   # Change it from hardcoded
-                                                  worker_init=f"module load mafft;module load anaconda3/2024.02_sequana;eval \"$(conda shell.bash hook)\";conda activate /scratch/cenapadrjsd/rafael.terra2/conda_envs/parslcodeml;export PYTHONPATH=$PYTHONPATH:{os.getcwd()}",
+                                                  worker_init=f"module load mafft;module load anaconda3/2024.02_sequana;eval \"$(conda shell.bash hook)\";conda {os.getenv("CONDA_ENV")};export PYTHONPATH=$PYTHONPATH:{os.getcwd()}",
                                                   launcher=SrunLauncher(
                                                       overrides=f'-c {n_workers}')
                                               )
