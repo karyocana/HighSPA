@@ -22,6 +22,8 @@ if __name__ == "__main__":
         "-o", "--output", help="Folder where the outputs will be stored.", required=True, type=str)
     parser.add_argument("-e", "--executables",
                         help="Json file containing the executables' info.", required=True, type=str)
+    parser.add_argument("-env", "--environment",
+                        help="Plain text file containing the environment variables and everything else that should be loaded in the worker node.", required=False, type=str, default=None)
     parser.add_argument("-m", "--monitoring", help="Flag to inform parsl to store metadata about the execution.",
                         action=argparse.BooleanOptionalAction)
     parser.add_argument("--onslurm", help="Flag to inform parsl to execute using the HighThroughput executor.",
@@ -32,7 +34,8 @@ if __name__ == "__main__":
     # Carregar a configuração do Parsl e verifica o caminho dos executáveis
     cfg = gen_config(threads=args.threads,
                      label="default",
-                     monitoring=args.monitoring, slurm=args.onslurm)
+                     monitoring=args.monitoring, slurm=args.onslurm,
+                     environment_file = args.environment)
     executables = load_and_check_executables(args.executables)
     parsl.set_file_logger(
         f"ParslCodeML-{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.log")

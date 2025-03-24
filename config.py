@@ -12,7 +12,7 @@ import os
 logger = logging.getLogger()
 
 
-def gen_config(threads=4, label="local", monitoring=True, slurm=False):
+def gen_config(threads=4, label="local", monitoring=True, slurm=False, environment=None):
     monitor = None
     if monitoring:
         monitor = MonitoringHub(hub_address=address_by_hostname(),
@@ -26,6 +26,15 @@ def gen_config(threads=4, label="local", monitoring=True, slurm=False):
             monitoring=monitor
         )
     else:
+        worker_init = ""
+        if environment is not None:
+            try:
+                with open(environment, 'r') as env_:
+                    text = env_.readlines()
+                    worker_init = ";".join([line.strip() for line in text])
+            except:
+                worker_init = ""
+            
         n_workers = os.getenv("SLURM_CPUS_ON_NODE")
         n_nodes = os.getenv("SLURM_NNODES")
         return Config(
@@ -39,9 +48,7 @@ def gen_config(threads=4, label="local", monitoring=True, slurm=False):
                                                   max_blocks=int(n_nodes),
                                                   min_blocks=0,
                                                   parallelism=1,
-                                                  # TODO
-                                                  # Change it from hardcoded
-                                                  worker_init=f"module load mafft;module load anaconda3/2024.02_sequana;eval \"$(conda shell.bash hook)\";conda {os.getenv("CONDA_ENV")};export PYTHONPATH=$PYTHONPATH:{os.getcwd()}",
+                                                  worker_init=worker_init,
                                                   launcher=SrunLauncher(
                                                       overrides=f'-c {n_workers}')
                                               )
