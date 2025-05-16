@@ -51,7 +51,8 @@ def gen_config(threads=4, label="local", monitoring=True, slurm=False, environme
                                                   worker_init=worker_init,
                                                   launcher=SrunLauncher(
                                                       overrides=f'-c {n_workers}')
-                                              )
+                                              ),
+                                              interchange_port_range=(65000,65500)
                                               )],
             monitoring=monitor
         )
