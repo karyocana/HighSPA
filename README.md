@@ -1,5 +1,8 @@
+# HighSPA - High Performance Selection Pressure Analysis Framework
+HighSPA is a scientific workflow framework that integrates ParslCodeML and ParslHyPhy for high-throughput analyses of selection pressure.
+
 # ParslCodeml
-ParslCodeml is a Python script designed to automate phylogenetic analyses using a series of bioinformatics tools. It leverages the Parsl parallel computing library to handle multiple tasks efficiently, making it an ideal choice for large-scale sequence processing pipelines.
+ParslCodeml is a Python workflow designed to automate phylogenetic analyses using a series of bioinformatics tools. It leverages the Parsl parallel computing library to handle multiple tasks efficiently, making it an ideal choice for large-scale sequence processing pipelines.
 
 ## Features
 - MAFFT: Aligns sequence data in FASTA format.
