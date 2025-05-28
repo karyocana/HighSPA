@@ -1,0 +1,13 @@
+1
+4
+1
+%=FASTA_FILE%.phylip
+RAxML_result.%=FASTA_FILE%.tree
+outfile_result.%=FASTA_FILE%
+outfile_result.%=FASTA_FILE%
+20
+3
+0.05
+1
+save
+1
