@@ -3,7 +3,7 @@
 This folder contains the data from the experiments performed in our paper, along with the script used to visualize and extract information from the different models for each gene.
 
 ---
-Using the sequences from the table below as input, we applied the workflow with CodeML to detect positive selection across complete DENV genomes from Brazil. The outputs from the workflow execution can be found in the [Results](./results) folder.
+Using the sequences from the table below as input, we applied the workflow with CodeML to detect positive selection across complete DENV genomes from Brazil. The outputs from the workflow execution and the data generated from the analysis script can be found in the [Results](./results) folder.
 
 
 
