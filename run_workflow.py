@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
-import os
-import sys
-import re
-import argparse
-import parsl
-import glob
-from parsl.data_provider.files import File
+import os, sys, re, argparse, glob
 from pathlib import Path
 from datetime import datetime
-import parsl.log_utils
+import parsl
+from parsl.data_provider.files import File
 from config import *
 from apps import *
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog="ParslCodeML",
                                      description="Python script designed to automate phylogenetic analyses using a series of bioinformatics tools.")
@@ -28,9 +24,9 @@ if __name__ == "__main__":
                         action=argparse.BooleanOptionalAction)
     parser.add_argument("--onslurm", help="Flag to inform parsl to execute using the HighThroughput executor.",
                         action=argparse.BooleanOptionalAction)
-
+    parser.add_argument("--hyphy", help="By default the workflow will process the sequences using codeml, with this parameter the workflow will use hyphy instead.", action=argparse.BooleanOptionalAction)
     args = parser.parse_args()
-
+    use_hyphy = args.hyphy
     # Carregar a configuração do Parsl e verifica o caminho dos executáveis
     cfg = gen_config(threads=args.threads,
                      label="default",
@@ -53,6 +49,14 @@ if __name__ == "__main__":
         "M8": codeml
     }
 
+    hyphy_apps = {
+        "ny": hyphy,
+        "meme": hyphy,
+        "slac": hyphy,
+        "fubar": hyphy,
+        "fel": hyphy,
+        "absrel": hyphy
+    }
     # Pegando os argumentos
     max_threads = args.threads
     inputs = args.input
@@ -64,7 +68,9 @@ if __name__ == "__main__":
     # Inicializando as listas de futuros para cada etapa
     codeml_futures = {model: []
                       for model in ["M0", "M1", "M2", "M3", "M7", "M8"]}
-
+    
+    hyphy_futures = {model: []
+                      for model in ["ny", "meme", "slac", "fubar", "fel", "absrel"]}
     # Execução do MAFFT
     for i in fasta_files:
         prefix = Path(i).stem
@@ -100,14 +106,26 @@ if __name__ == "__main__":
         ret_raxml = raxml(executables, infile=ret_mafft.outputs[0], prefix=prefix, outputs=[
                           File(output_raxml)])
         # Execução do Codeml, aguardando os resultados de RAXML e Format Phylip
-        for model, app in codeml_apps.items():
-            output_codeml = os.path.join(dir_outputs, os.path.join(
-                model, f"{model}_{prefix}.results.txt"))
-            # Adicionar a tarefa de Codeml
-            codeml_futures[model].append(
-                app(executables, infile=ret_format_phylip.outputs[0], treefile=ret_raxml.outputs[0], prefix=prefix,
-                    model=model, dir_outputs=dir_outputs, outputs=[File(output_codeml)])
-            )
+        if use_hyphy == False:
+            for model, app in codeml_apps.items():
+                output_codeml = os.path.join(dir_outputs, os.path.join(
+                    model, f"{model}_{prefix}.results.txt"))
+                # Adicionar a tarefa de Codeml
+                codeml_futures[model].append(
+                    app(executables, infile=ret_format_phylip.outputs[0], treefile=ret_raxml.outputs[0], prefix=prefix,
+                        model=model, dir_outputs=dir_outputs, outputs=[File(output_codeml)])
+                )
+        else:
+            # Execução do Hyphy, aguardando os resultados de RAXML e Phylip (saida do mafft)
+            for model, app in hyphy_apps.items():
+                output_hyphy = os.path.join(dir_outputs, os.path.join(
+                    model, f"{model}_{prefix}.results.txt"))
+                # Adicionar a tarefa de Hyphy
+                hyphy_futures[model].append(
+                    app(executables, infile=ret_mafft.outputs[0], treefile=ret_raxml.outputs[0], prefix=prefix,
+                        model=model, dir_outputs=dir_outputs, outputs=[File(output_hyphy)])
+                )
+
 
     parsl.wait_for_current_tasks()
     logger.info("All tasks were performed! Finishing execution!")
