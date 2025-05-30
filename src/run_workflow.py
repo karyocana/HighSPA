@@ -90,13 +90,6 @@ if __name__ == "__main__":
         #            prefix}, output will be saved to {output_readseq}.")
         # ret_readseq = readseq(executables, infile=ret_mafft[0].outputs[0], prefix=prefix, outputs=[
         #                      File(output_readseq)])
-        # Formatação do arquivo phylip
-        output_formatted_phylip = os.path.join(
-            dir_outputs, f"{prefix}_formatted.phylip")
-        logger.info(f"Starting format_phylip for {
-                    output_mafft}, output will be saved to {output_formatted_phylip}.")
-        ret_format_phylip = format_phylip(infile=ret_mafft.outputs[0], prefix=prefix, outputs=[
-                                          File(output_formatted_phylip)])
 
         # Execução do RAXML, aguardando os resultados de Format Phylip
         output_raxml = os.path.join(
@@ -107,6 +100,13 @@ if __name__ == "__main__":
                           File(output_raxml)])
         # Execução do Codeml, aguardando os resultados de RAXML e Format Phylip
         if use_hyphy == False:
+            # Formatação do arquivo phylip
+            output_formatted_phylip = os.path.join(
+                dir_outputs, f"{prefix}_formatted.phylip")
+            logger.info(f"Starting format_phylip for {
+                        output_mafft}, output will be saved to {output_formatted_phylip}.")
+            ret_format_phylip = format_phylip(infile=ret_mafft.outputs[0], prefix=prefix, outputs=[
+                                              File(output_formatted_phylip)])
             for model, app in codeml_apps.items():
                 output_codeml = os.path.join(dir_outputs, os.path.join(
                     model, f"{model}_{prefix}.results.txt"))
