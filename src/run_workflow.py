@@ -119,7 +119,7 @@ if __name__ == "__main__":
             # Execução do Hyphy, aguardando os resultados de RAXML e Phylip (saida do mafft)
             for model, app in hyphy_apps.items():
                 output_hyphy = os.path.join(dir_outputs, os.path.join(
-                    model, f"{model}_{prefix}.results.txt"))
+                    model, f"{model}_{prefix}.results.json"))
                 # Adicionar a tarefa de Hyphy
                 hyphy_futures[model].append(
                     app(executables, infile=ret_mafft.outputs[0], treefile=ret_raxml.outputs[0], prefix=prefix,
