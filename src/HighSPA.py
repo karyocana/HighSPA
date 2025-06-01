@@ -8,10 +8,10 @@ from config import *
 from apps import *
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog="ParslCodeML",
+    parser = argparse.ArgumentParser(prog="HighSPA framework",
                                      description="Python script designed to automate phylogenetic analyses using a series of bioinformatics tools.")
     parser.add_argument(
-        "-t", "--threads", help="Maximum number of threads used by the workflow.", required=True, type=int)
+        "-t", "--threads", help="Maximum number of threads used by the workflow.", required=False, type=int, default=1)
     parser.add_argument(
         "-i", "--input", help="Folder containing the fasta files used by the workflow.", required=True, type=str)
     parser.add_argument(

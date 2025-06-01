@@ -1,3 +1,0 @@
---> executable follows <--
-python /Users/karyocana/parslCodeml/scripts/format_phylip.py /Users/karyocana/parslCodeml/outputs/test.phylip > /Users/karyocana/parslCodeml/outputs/test_formatted.phylip
---> end executable <--
