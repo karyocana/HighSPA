@@ -14,5 +14,8 @@
     "codeml": {
         "path": "",
         "executable": "codeml"
-    }
+    },
+    "hyphy": {
+        "path":"",
+        "executable": "hyphy"
 }
