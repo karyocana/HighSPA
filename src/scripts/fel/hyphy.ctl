@@ -7,11 +7,10 @@ RAxML_result.%=FASTA_FILE%.tree
 1
 3
 0.05
-2
+outfile_result.%=FASTA_FILE%
 skip
 skip
 0
-outfile_result.%=FASTA_FILE%
 1
 save
 1

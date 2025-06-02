@@ -145,4 +145,4 @@ def hyphy(executables, infile, treefile, prefix, model, dir_outputs, outputs=[],
         new_ctl_file.write(ctl_content)
 
     # Retornar o comando para execução do hyphy
-    return f"cd {model_output_dir} && {executables['hyphy']} < hyphy.ctl"
+    return f"cd {model_output_dir} && {executables['hyphy']} -i < hyphy.ctl"
