@@ -31,7 +31,7 @@ if __name__ == "__main__":
     cfg = gen_config(threads=args.threads,
                      label="default",
                      monitoring=args.monitoring, slurm=args.onslurm,
-                     environment_file = args.environment)
+                     environment = args.environment)
     executables = load_and_check_executables(args.executables)
     parsl.set_file_logger(
         f"ParslCodeML-{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.log")
