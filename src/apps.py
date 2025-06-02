@@ -31,6 +31,18 @@ def raxml(executables, infile, prefix, outputs=[], stdout = parsl.AUTO_LOGNAME, 
     output_dir = str(outputs[0].url).rsplit('/', 1)[0]
     return f'{executables["raxml"]} -s {infile} -m GTRCAT -n {prefix}_output.tree -w {output_dir} -p {seed}'
 
+@python_app
+def format_tree(infile, prefix, outputs=[], stdout = parsl.AUTO_LOGNAME, stderr = parsl.AUTO_LOGNAME):
+    import os
+     # corrigir erro do tree_file adicionando 1 e removendo a nova linha do final
+    logger.info(f"Formatting RAxML tree {infile} with prefix {prefix}.")
+    content = ""
+    with open(infile.filepath, 'r') as t_file:
+        content = t_file.read()
+    with open(outputs[0], "w+") as n_file:
+        line = "1"
+        n_file.write(line.rstrip('\r\n') + '\n' + content.rstrip('\r\n'))
+    return
 @bash_app
 def codeml(executables, infile, treefile, prefix, model, dir_outputs, outputs=[], stdout = parsl.AUTO_LOGNAME, stderr=parsl.AUTO_LOGNAME):
     
@@ -62,10 +74,9 @@ def codeml(executables, infile, treefile, prefix, model, dir_outputs, outputs=[]
     # Substituir o campo 'treefile' no arquivo .ctl
     ctl_content = re.sub(
         r"treefile\s*=\s*.*",  # Localizar a linha específica de "treefile"
-        f"treefile = {treefile.filepath}",  # Substituir com o caminho fixo para o treefile
+        f"treefile = {treefile.filepath + "_codeml"}",  # Substituir com o caminho fixo para o treefile
         ctl_content
     )
-
     # Corrigir o campo "outfile" com o formato correto
     outfile_path = os.path.join(model_output_dir, f"{model}_{prefix}.results.txt")  # Caminho correto para o outfile
     print(f"outfile_path: {outfile_path}")  # Depuração do caminho do outfile
@@ -134,4 +145,4 @@ def hyphy(executables, infile, treefile, prefix, model, dir_outputs, outputs=[],
         new_ctl_file.write(ctl_content)
 
     # Retornar o comando para execução do hyphy
-    return f"cd {model_output_dir} && {executables['hyphy']} -i < hyphy.ctl > nohup"
+    return f"cd {model_output_dir} && {executables['hyphy']} < hyphy.ctl"

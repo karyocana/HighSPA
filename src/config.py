@@ -16,7 +16,7 @@ def gen_config(threads=4, label="local", monitoring=True, slurm=False, environme
     monitor = None
     if monitoring:
         monitor = MonitoringHub(hub_address=address_by_hostname(),
-                                workflow_name="ParslCodeML")
+                                workflow_name="HighSPA")
     if slurm == False:
         return Config(
             executors=[ThreadPoolExecutor(label=label,

@@ -21,10 +21,10 @@ if __name__ == "__main__":
     parser.add_argument("-env", "--environment",
                         help="Plain text file containing the environment variables and everything else that should be loaded in the worker node.", required=False, type=str, default=None)
     parser.add_argument("-m", "--monitoring", help="Flag to inform parsl to store metadata about the execution.",
-                        action=argparse.BooleanOptionalAction)
+                        action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--onslurm", help="Flag to inform parsl to execute using the HighThroughput executor.",
-                        action=argparse.BooleanOptionalAction)
-    parser.add_argument("--hyphy", help="By default the workflow will process the sequences using codeml, with this parameter the workflow will use hyphy instead.", action=argparse.BooleanOptionalAction)
+                        action=argparse.BooleanOptionalAction, default=False)
+    parser.add_argument("--hyphy", help="By default the workflow will process the sequences using codeml, with this parameter the workflow will use hyphy instead.", action=argparse.BooleanOptionalAction, default=False)
     args = parser.parse_args()
     use_hyphy = args.hyphy
     # Carregar a configuração do Parsl e verifica o caminho dos executáveis
@@ -34,8 +34,8 @@ if __name__ == "__main__":
                      environment = args.environment)
     executables = load_and_check_executables(args.executables)
     parsl.set_file_logger(
-        f"ParslCodeML-{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.log")
-    parsl.set_stream_logger(stream=sys.stdout)
+        f"HighSPA-{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.log", level=logging.INFO)
+    parsl.set_stream_logger(stream=sys.stdout, level=logging.INFO)
     logger = logging.getLogger()
     parsl.load(cfg)
 
@@ -94,8 +94,7 @@ if __name__ == "__main__":
         # Execução do RAXML, aguardando os resultados de Format Phylip
         output_raxml = os.path.join(
             dir_outputs, f"RAxML_result.{prefix}_output.tree")
-        logger.info(f"Starting RAxML for {
-                    ret_format_phylip}, output will be saved to {output_raxml}.")
+        logger.info(f"Starting RAxML, output will be saved to {output_raxml}.")
         ret_raxml = raxml(executables, infile=ret_mafft.outputs[0], prefix=prefix, outputs=[
                           File(output_raxml)])
         # Execução do Codeml, aguardando os resultados de RAXML e Format Phylip
@@ -107,12 +106,14 @@ if __name__ == "__main__":
                         output_mafft}, output will be saved to {output_formatted_phylip}.")
             ret_format_phylip = format_phylip(infile=ret_mafft.outputs[0], prefix=prefix, outputs=[
                                               File(output_formatted_phylip)])
+            output_formatted_raxml = os.path.join(dir_outputs, f"RAxML_result.{prefix}_output_formatted.tree")
+            ret_format_raxml = format_tree(infile=ret_raxml.outputs[0], prefix=prefix, outputs=File(output_formatted_raxml))
             for model, app in codeml_apps.items():
                 output_codeml = os.path.join(dir_outputs, os.path.join(
                     model, f"{model}_{prefix}.results.txt"))
                 # Adicionar a tarefa de Codeml
                 codeml_futures[model].append(
-                    app(executables, infile=ret_format_phylip.outputs[0], treefile=ret_raxml.outputs[0], prefix=prefix,
+                    app(executables, infile=ret_format_phylip.outputs[0], treefile=ret_format_raxml.outputs[0], prefix=prefix,
                         model=model, dir_outputs=dir_outputs, outputs=[File(output_codeml)])
                 )
         else:
