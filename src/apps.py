@@ -74,7 +74,7 @@ def codeml(executables, infile, treefile, prefix, model, dir_outputs, outputs=[]
     # Substituir o campo 'treefile' no arquivo .ctl
     ctl_content = re.sub(
         r"treefile\s*=\s*.*",  # Localizar a linha específica de "treefile"
-        f"treefile = {treefile.filepath + "_codeml"}",  # Substituir com o caminho fixo para o treefile
+        f"treefile = {treefile.filepath}",  # Substituir com o caminho fixo para o treefile
         ctl_content
     )
     # Corrigir o campo "outfile" com o formato correto

@@ -107,7 +107,7 @@ if __name__ == "__main__":
             ret_format_phylip = format_phylip(infile=ret_mafft.outputs[0], prefix=prefix, outputs=[
                                               File(output_formatted_phylip)])
             output_formatted_raxml = os.path.join(dir_outputs, f"RAxML_result.{prefix}_output_formatted.tree")
-            ret_format_raxml = format_tree(infile=ret_raxml.outputs[0], prefix=prefix, outputs=File(output_formatted_raxml))
+            ret_format_raxml = format_tree(infile=ret_raxml.outputs[0], prefix=prefix, outputs=[File(output_formatted_raxml)])
             for model, app in codeml_apps.items():
                 output_codeml = os.path.join(dir_outputs, os.path.join(
                     model, f"{model}_{prefix}.results.txt"))
