@@ -26,7 +26,7 @@ The execution of the ParslHyPhy workflow is similar to its counterpart; however,
 - [RAxML](https://cme.h-its.org/exelixis/web/software/raxml/)
 - [HyPHY](https://hyphy.org/)
 - Additional Python dependencies (see requirements.txt)
-  
+
 ### Setup
 1. Clone this repository:
 ```
@@ -153,4 +153,4 @@ This project is licensed under the [MIT License](./LICENSE).
 
 ## Acknowledgments
 - Developed using [Parsl](https://parsl-project.org/) for parallel task execution.
-- Utilizes tools from the PAML suite, MAFFT, and RAxML for bioinformatics analyses.
+- Utilizes tools from the PAML suite, HYPHY suite, MAFFT, and RAxML for bioinformatics analyses.
