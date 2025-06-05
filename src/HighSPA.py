@@ -24,9 +24,11 @@ if __name__ == "__main__":
                         action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--onslurm", help="Flag to inform parsl to execute using the HighThroughput executor.",
                         action=argparse.BooleanOptionalAction, default=False)
-    parser.add_argument("--hyphy", help="By default the workflow will process the sequences using codeml, with this parameter the workflow will use hyphy instead.", action=argparse.BooleanOptionalAction, default=False)
+    parser.add_argument("--hyphy", help="By default the workflow will process the sequences using CodeML, with this parameter the workflow will use HyPhy instead.", action=argparse.BooleanOptionalAction, default=False)
+    parser.add_argument("--both", help="By default the workflow will process the sequences using CodeML, with this parameter the workflow will use both CodeML and HyPhy instead.", action=argparse.BooleanOptionalAction, default=False)
     args = parser.parse_args()
     use_hyphy = args.hyphy
+    use_both = args.both
     # Carregar a configuração do Parsl e verifica o caminho dos executáveis
     cfg = gen_config(threads=args.threads,
                      label="default",
@@ -98,14 +100,23 @@ if __name__ == "__main__":
         ret_raxml = raxml(executables, infile=ret_mafft.outputs[0], prefix=prefix, outputs=[
                           File(output_raxml)])
         # Execução do Codeml, aguardando os resultados de RAXML e Format Phylip
-        if use_hyphy == False:
+        to_run_codeml = True #Default
+        to_run_hyphy = False
+        if use_both == False:
+            if use_hyphy == True:
+                to_run_codeml = False
+                to_run_hyphy = True
+        else:
+            to_run_codeml = True
+            to_run_hyphy = True
+        if to_run_codeml == True:
             # Formatação do arquivo phylip
             output_formatted_phylip = os.path.join(
                 dir_outputs, f"{prefix}_formatted.phylip")
             logger.info(f"Starting format_phylip for {
                         output_mafft}, output will be saved to {output_formatted_phylip}.")
             ret_format_phylip = format_phylip(infile=ret_mafft.outputs[0], prefix=prefix, outputs=[
-                                              File(output_formatted_phylip)])
+                                            File(output_formatted_phylip)])
             output_formatted_raxml = os.path.join(dir_outputs, f"RAxML_result.{prefix}_output_formatted.tree")
             ret_format_raxml = format_tree(infile=ret_raxml.outputs[0], prefix=prefix, outputs=[File(output_formatted_raxml)])
             for model, app in codeml_apps.items():
@@ -116,7 +127,7 @@ if __name__ == "__main__":
                     app(executables, infile=ret_format_phylip.outputs[0], treefile=ret_format_raxml.outputs[0], prefix=prefix,
                         model=model, dir_outputs=dir_outputs, outputs=[File(output_codeml)])
                 )
-        else:
+        if to_run_hyphy == True:
             # Execução do Hyphy, aguardando os resultados de RAXML e Phylip (saida do mafft)
             for model, app in hyphy_apps.items():
                 output_hyphy = os.path.join(dir_outputs, os.path.join(

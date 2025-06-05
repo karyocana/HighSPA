@@ -12,13 +12,13 @@
 module load mafft
 module load anaconda3/2024.02_sequana
 eval "$(conda shell.bash hook)"
-CONDA_ENV="/path/to/conda/env
+CONDA_ENV="/path/to/conda/env"
 conda activate ${CONDA_ENV}
 CDIR="/path/to/HighSPA"
 INPUT_FOLDER="${CDIR}/examples/inputs"
 OUTPUT_FOLDER="${CDIR}/output"
-EXECUTABLES="${CDIR}/executables.json
-ENV_FILE="${CDIR}/path/to/env_file
+EXECUTABLES="${CDIR}/executables.json"
+ENV_FILE="${CDIR}/path/to/env_file"
 mkdir -p $OUTPUT_FOLDER
 
 export CONDA_ENV
