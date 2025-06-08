@@ -51,10 +51,6 @@ pip install -r requirements.txt
             "path": "",
             "executable": "mafft"
         },
-        "readseq": {
-            "path": "/mnt/d/Users/rafae/Documents/GitHub/ParslCodeml",
-            "executable": "readseq.jar"
-        },
         "raxml": {
             "path": "",
             "executable": "raxmlHPC"
