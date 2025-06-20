@@ -22,4 +22,4 @@ ENV_FILE="${CDIR}/path/to/env_file"
 mkdir -p $OUTPUT_FOLDER
 
 export CONDA_ENV
-python parslCodeml.py -i ${INPUT_FOLDER} -o ${OUTPUT_FOLDER} -e ${EXECUTABLES} -env ${ENV_FILE} --onslurm
+python HighSPA.py -i ${INPUT_FOLDER} -o ${OUTPUT_FOLDER} -e ${EXECUTABLES} -env ${ENV_FILE} --onslurm
