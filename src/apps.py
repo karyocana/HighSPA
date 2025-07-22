@@ -24,11 +24,9 @@ def format_phylip(infile, prefix, outputs=[], stdout = parsl.AUTO_LOGNAME, stder
     return
 
 @bash_app
-def raxml(executables, infile, prefix, outputs=[], stdout = parsl.AUTO_LOGNAME, stderr=parsl.AUTO_LOGNAME):
-    import random
-    seed = random.randint(1, 1000)
-    logger.info(f"Running RAxML on {infile} with prefix {prefix} and seed {seed}.")
+def raxml(executables, infile, prefix, seed, outputs=[], stdout = parsl.AUTO_LOGNAME, stderr=parsl.AUTO_LOGNAME):
     output_dir = str(outputs[0].url).rsplit('/', 1)[0]
+    logger.info(f"Running RAxML on {infile} with prefix {prefix} and seed {seed}.")
     return f'{executables["raxml"]} -s {infile} -m GTRCAT -n {prefix}_output.tree -w {output_dir} -p {seed}'
 
 @python_app

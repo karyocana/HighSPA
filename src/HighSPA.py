@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os, sys, re, argparse, glob
+import os, sys, re, argparse, glob, random
 from pathlib import Path
 from datetime import datetime
 import parsl
@@ -16,6 +16,8 @@ if __name__ == "__main__":
         "-i", "--input", help="Folder containing the fasta files used by the workflow.", required=True, type=str)
     parser.add_argument(
         "-o", "--output", help="Folder where the outputs will be stored.", required=True, type=str)
+    parser.add_argument(
+        "-s", "--seed", help="Folder where the outputs will be stored.", required=False, type=int)
     parser.add_argument("-e", "--executables",
                         help="Json file containing the executables' info.", required=True, type=str)
     parser.add_argument("-env", "--environment",
@@ -29,6 +31,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     use_hyphy = args.hyphy
     use_both = args.both
+    if args.seed:
+        seed = args.seed
+    else:
+        seed = random.randint(1, 1000)
     # Carregar a configuração do Parsl e verifica o caminho dos executáveis
     cfg = gen_config(threads=args.threads,
                      label="default",
@@ -97,7 +103,7 @@ if __name__ == "__main__":
         output_raxml = os.path.join(
             dir_outputs, f"RAxML_result.{prefix}_output.tree")
         logger.info(f"Starting RAxML, output will be saved to {output_raxml}.")
-        ret_raxml = raxml(executables, infile=ret_mafft.outputs[0], prefix=prefix, outputs=[
+        ret_raxml = raxml(executables, infile=ret_mafft.outputs[0], prefix=prefix, seed=seed, outputs=[
                           File(output_raxml)])
         # Execução do Codeml, aguardando os resultados de RAXML e Format Phylip
         to_run_codeml = True #Default
