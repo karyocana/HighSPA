@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os, sys, re, argparse, glob
+import os, sys, re, argparse, glob, logging
 from pathlib import Path
 from datetime import datetime
 import parsl
@@ -34,7 +34,7 @@ if __name__ == "__main__":
                      environment = args.environment)
     executables = load_and_check_executables(args.executables)
     parsl.set_file_logger(
-        f"HighSPA-{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.log", level=logging.INFO)
+        f"Log-HighSPA-{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.log", level=logging.INFO)
     parsl.set_stream_logger(stream=sys.stdout, level=logging.INFO)
     logger = logging.getLogger()
     parsl.load(cfg)
