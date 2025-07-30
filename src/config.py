@@ -3,7 +3,7 @@ from parsl.providers import LocalProvider
 from parsl.launchers import SrunLauncher
 from parsl.config import Config
 from parsl.monitoring import MonitoringHub
-from parsl.addresses import address_by_hostname
+from parsl.addresses import address_by_hostname, address_by_interface
 import json as js
 import logging
 import shutil
@@ -30,8 +30,9 @@ def gen_config(threads=4, label="local", monitoring=True, slurm=False, environme
         if environment is not None:
             try:
                 with open(environment, 'r') as env_:
-                    text = env_.readlines()
-                    worker_init = ";".join([line.strip() for line in text])
+                    worker_init = env_.read()
+                    workflow_path = os.path.dirname(os.path.realpath(__file__))
+                    worker_init+=f'\nexport PYTHONPATH=$PYTHONPATH:{workflow_path}'
             except:
                 worker_init = ""
             
@@ -39,14 +40,15 @@ def gen_config(threads=4, label="local", monitoring=True, slurm=False, environme
         n_nodes = os.getenv("SLURM_NNODES")
         return Config(
             executors=[HighThroughputExecutor(label=label,
-                                              address=address_by_hostname(),
+                                              address=address_by_interface('ib0'),
+#                                              worker_port_range=(65000, 65500),
                                               max_workers_per_node=int(
                                                   n_workers),
                                               provider=LocalProvider(
                                                   nodes_per_block=1,
-                                                  init_blocks=1,
+                                                  init_blocks=int(n_nodes),
                                                   max_blocks=int(n_nodes),
-                                                  min_blocks=0,
+                                                  min_blocks=1,
                                                   parallelism=1,
                                                   worker_init=worker_init,
                                                   launcher=SrunLauncher(
